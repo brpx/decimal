@@ -51,6 +51,8 @@ var DivisionPrecision = 16
 // double-precision floating point numbers, which means you can potentially
 // silently lose precision.
 var MarshalJSONWithoutQuotes = false
+var MarshalJSONWithDecimalPlaces = true
+var MarshalJSONDecimalPlaces int32 = 2
 
 // Zero constant, to make computations faster.
 var Zero = New(0, 1)
@@ -929,11 +931,18 @@ func (d *Decimal) UnmarshalJSON(decimalBytes []byte) error {
 
 // MarshalJSON implements the json.Marshaler interface.
 func (d Decimal) MarshalJSON() ([]byte, error) {
+	var stringVal string
+	if MarshalJSONWithDecimalPlaces {
+		stringVal = d.StringFixed(MarshalJSONDecimalPlaces)
+	} else {
+		stringVal = d.String()
+	}
+
 	var str string
 	if MarshalJSONWithoutQuotes {
-		str = d.String()
+		str = stringVal
 	} else {
-		str = "\"" + d.String() + "\""
+		str = "\"" + stringVal + "\""
 	}
 	return []byte(str), nil
 }
